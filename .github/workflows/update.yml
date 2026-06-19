@@ -70,6 +70,8 @@ jobs:
             echo "keystorepass: $FDROID_KEYSTORE_PASS"
             echo "keypass: $FDROID_KEY_PASS"
           } >> config.yml
+          # fdroid warns (and may refuse) if these are group/world-readable
+          chmod 600 config.yml keystore.p12
 
       - name: Generate index
         run: uvx --from fdroidserver fdroid update --create-metadata --verbose
