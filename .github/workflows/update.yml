@@ -40,19 +40,21 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@v5
 
-      # Pull the latest v* release APK from the Domitara repo into repo/
+      # Pull the latest release APK that actually carries an .apk asset. Some
+      # releases are backend/Docker only (no APK), so we can't just take the
+      # newest tag — pick the most recent release whose assets include an APK.
       - name: Download Domitara APK
         env:
           # domitara/domitara is public, so the default token can read its releases
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p repo
-          TAG=$(gh release list --repo domitara/domitara --limit 100 \
-            --json tagName -q '[.[].tagName | select(startswith("v"))][0]')
+          TAG=$(gh api 'repos/domitara/domitara/releases?per_page=100' \
+            -q 'first(.[] | select(.draft | not) | select(any(.assets[]; .name | endswith(".apk")))) | .tag_name')
           if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
-            echo "::error::No v* release found" && exit 1
+            echo "::error::No release with an .apk asset found" && exit 1
           fi
-          echo "Latest release: $TAG"
+          echo "Latest release with an APK: $TAG"
           gh release download "$TAG" --repo domitara/domitara \
             --pattern '*.apk' --dir repo/ --clobber
 
