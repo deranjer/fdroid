@@ -1,0 +1,17 @@
+Categories:
+  - Productivity
+License: MIT
+AuthorName: deranjer
+Name: Domitara
+Summary: Self-hosted home & item inventory client
+Description: |
+  Native Android client for Domitara, a self-hosted home inventory and
+  maintenance manager. Browse your items, track maintenance, and manage your
+  homes from your own server.
+
+WebSite: https://github.com/domitara/domitara
+SourceCode: https://github.com/domitara/domitara
+IssueTracker: https://github.com/domitara/domitara/issues
+
+# Prebuilt APKs are pulled from GitHub Releases; fdroid does not build from source.
+UpdateCheckMode: None

@@ -1,0 +1,11 @@
+repo_url: https://deranjer.github.io/fdroid/repo
+repo_name: deranjer's apps
+repo_description: Self-hosted F-Droid repository
+
+# Categories offered by this repo (metadata Categories must come from this list)
+categories:
+  - Productivity
+
+keystore: keystore.p12
+repo_keyalias: index
+# keystorepass and keypass are appended by CI from secrets — do not commit them.

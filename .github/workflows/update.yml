@@ -1,0 +1,94 @@
+name: Update F-Droid repo
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # daily 06:00 UTC
+  workflow_dispatch:
+
+# Needed for the GitHub Pages deploy
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Avoid overlapping index regenerations
+concurrency:
+  group: fdroid-update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # jarsigner (index signing) comes from the JDK
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # apksigner + aapt let fdroid verify/parse APKs without a full Android SDK
+      - name: Install Android tools
+        run: sudo apt-get update && sudo apt-get install -y apksigner aapt
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+
+      # Pull the latest v* release APK from the Domitara repo into repo/
+      - name: Download Domitara APK
+        env:
+          # domitara/domitara is public, so the default token can read its releases
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p repo
+          TAG=$(gh release list --repo domitara/domitara --limit 100 \
+            --json tagName -q '[.[].tagName | select(startswith("v"))][0]')
+          if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
+            echo "::error::No v* release found" && exit 1
+          fi
+          echo "Latest release: $TAG"
+          gh release download "$TAG" --repo domitara/domitara \
+            --pattern '*.apk' --dir repo/ --clobber
+
+      # Restore signing material; passwords are appended so they never sit in git
+      - name: Restore keystore & secrets
+        env:
+          FDROID_KEYSTORE_BASE64: ${{ secrets.FDROID_KEYSTORE_BASE64 }}
+          FDROID_KEYSTORE_PASS: ${{ secrets.FDROID_KEYSTORE_PASS }}
+          FDROID_KEY_PASS: ${{ secrets.FDROID_KEY_PASS }}
+        run: |
+          echo "$FDROID_KEYSTORE_BASE64" | base64 -d > keystore.p12
+          {
+            echo "keystorepass: $FDROID_KEYSTORE_PASS"
+            echo "keypass: $FDROID_KEY_PASS"
+          } >> config.yml
+
+      - name: Generate index
+        run: uvx --from fdroidserver fdroid update --create-metadata --verbose
+
+      # Stage ONLY the public repo dir — never publish keystore.p12 or config.yml
+      - name: Stage Pages site
+        run: |
+          rm -rf site && mkdir -p site
+          cp -r repo site/repo
+          cat > site/index.html <<'HTML'
+          <!doctype html><meta charset="utf-8"><title>deranjer's F-Droid repo</title>
+          <h1>deranjer's F-Droid repo</h1>
+          <p>Add this URL in the F-Droid client:</p>
+          <pre>https://deranjer.github.io/fdroid/repo</pre>
+          HTML
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
