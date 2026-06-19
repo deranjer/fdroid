@@ -1,0 +1,17 @@
+Categories:
+  - Productivity
+License: MIT
+AuthorName: deranjer
+Name: Nodeira
+Summary: AI-enhanced, offline-first note-taking client
+Description: |
+  Mobile client for Nodeira, an Obsidian-like, AI-enhanced note-taking app with
+  offline-first Yjs sync. Read and write your notes, set reminders, and stay in
+  sync with your own self-hosted server.
+
+WebSite: https://github.com/Nodeira/nodeira
+SourceCode: https://github.com/Nodeira/nodeira
+IssueTracker: https://github.com/Nodeira/nodeira/issues
+
+# Prebuilt APKs are pulled from GitHub Releases; fdroid does not build from source.
+UpdateCheckMode: None

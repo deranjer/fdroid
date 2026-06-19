@@ -58,6 +58,23 @@ jobs:
           gh release download "$TAG" --repo domitara/domitara \
             --pattern '*.apk' --dir repo/ --clobber
 
+      # Same pattern for Nodeira. If Nodeira/nodeira is private, set the
+      # NODEIRA_RELEASE_TOKEN secret to a PAT with read access to its releases;
+      # otherwise the default token reads its public releases.
+      - name: Download Nodeira APK
+        env:
+          GH_TOKEN: ${{ secrets.NODEIRA_RELEASE_TOKEN || github.token }}
+        run: |
+          mkdir -p repo
+          TAG=$(gh api 'repos/Nodeira/nodeira/releases?per_page=100' \
+            -q 'first(.[] | select(.draft | not) | select(any(.assets[]; .name | endswith(".apk")))) | .tag_name')
+          if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
+            echo "::error::No Nodeira release with an .apk asset found" && exit 1
+          fi
+          echo "Latest Nodeira release with an APK: $TAG"
+          gh release download "$TAG" --repo Nodeira/nodeira \
+            --pattern '*.apk' --dir repo/ --clobber
+
       # Restore signing material; passwords are appended so they never sit in git
       - name: Restore keystore & secrets
         env:
