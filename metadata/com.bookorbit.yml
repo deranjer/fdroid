@@ -1,0 +1,18 @@
+Categories:
+  - Reading
+License: AGPL-3.0-or-later
+AuthorName: deranjer
+Name: BookOrbit
+Summary: Self-hosted ebook & audiobook client
+Description: |
+  Native Android client for BookOrbit, a self-hosted ebook and audiobook library
+  server. Browse and search your library, read EPUBs and PDFs, and listen to
+  audiobooks with background playback, sleep timer, and Chromecast support — all
+  synced with your own server.
+
+WebSite: https://github.com/deranjer/bookorbit-android
+SourceCode: https://github.com/deranjer/bookorbit-android
+IssueTracker: https://github.com/deranjer/bookorbit-android/issues
+
+# Prebuilt APKs are pulled from GitHub Releases; fdroid does not build from source.
+UpdateCheckMode: None
