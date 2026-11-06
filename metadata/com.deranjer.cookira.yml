@@ -1,0 +1,17 @@
+Categories:
+  - Productivity
+License: MIT
+AuthorName: deranjer
+Name: Cookira
+Summary: Self-hosted household recipe book client
+Description: |
+  Native Android client for Cookira, a self-hosted household recipe book.
+  Browse and search recipes, cook step by step with timers, and read your
+  whole library offline, all synced with your own server.
+
+WebSite: https://github.com/deranjer/cookira
+SourceCode: https://github.com/deranjer/cookira
+IssueTracker: https://github.com/deranjer/cookira/issues
+
+# Prebuilt APKs are pulled from GitHub Releases; fdroid does not build from source.
+UpdateCheckMode: None
