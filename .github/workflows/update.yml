@@ -91,6 +91,20 @@ jobs:
           gh release download "$TAG" --repo deranjer/bookorbit-android \
             --pattern '*.apk' --dir repo/ --clobber
 
+      # Same pattern for Cookira. deranjer/cookira is public, so the default token can
+      # read its releases. Prereleases (tags with a -suffix) are skipped.
+      - name: Download Cookira APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p repo
+          TAG=$(gh api 'repos/deranjer/cookira/releases?per_page=100'             -q 'first(.[] | select(.draft | not) | select(.prerelease | not) | select(any(.assets[]; .name | endswith(".apk")))) | .tag_name')
+          if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
+            echo "::error::No Cookira release with an .apk asset found" && exit 1
+          fi
+          echo "Latest Cookira release with an APK: $TAG"
+          gh release download "$TAG" --repo deranjer/cookira             --pattern '*.apk' --dir repo/ --clobber
+
       # Restore signing material; passwords are appended so they never sit in git
       - name: Restore keystore & secrets
         env:
