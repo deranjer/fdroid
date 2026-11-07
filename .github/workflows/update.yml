@@ -91,36 +91,33 @@ jobs:
           gh release download "$TAG" --repo deranjer/bookorbit-android \
             --pattern '*.apk' --dir repo/ --clobber
 
+      # Same pattern for Cookira. deranjer/cookira is public, so the default token can
+      # read its releases. Prereleases (tags with a -suffix) are skipped.
+      - name: Download Cookira APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p repo
+          TAG=$(gh api 'repos/deranjer/cookira/releases?per_page=100'             -q 'first(.[] | select(.draft | not) | select(.prerelease | not) | select(any(.assets[]; .name | endswith(".apk")))) | .tag_name')
+          if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
+            echo "::error::No Cookira release with an .apk asset found" && exit 1
+          fi
+          echo "Latest Cookira release with an APK: $TAG"
+          gh release download "$TAG" --repo deranjer/cookira             --pattern '*.apk' --dir repo/ --clobber
+
       # Same pattern for Vigara mobile. Releases are tagged android-vX.Y.Z in deranjer/vigara
-      # (must be public, or set VIGARA_RELEASE_TOKEN to a PAT with read access).
+      # (public; set VIGARA_RELEASE_TOKEN to a PAT if it is ever made private).
       - name: Download Vigara APK
         env:
           GH_TOKEN: ${{ secrets.VIGARA_RELEASE_TOKEN || github.token }}
         run: |
           mkdir -p repo
-          TAG=$(gh api 'repos/deranjer/vigara/releases?per_page=100'             -q 'first(.[] | select(.draft | not) | select(any(.assets[]; .name | endswith(".apk"))) ) | .tag_name')
+          TAG=$(gh api 'repos/deranjer/vigara/releases?per_page=100'             -q 'first(.[] | select(.draft | not) | select(any(.assets[]; .name | endswith(".apk")))) | .tag_name')
           if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
             echo "::error::No Vigara release with an .apk asset found" && exit 1
           fi
           echo "Latest Vigara release with an APK: $TAG"
           gh release download "$TAG" --repo deranjer/vigara             --pattern '*.apk' --dir repo/ --clobber
-
-      # Same pattern for Cookira (deranjer/cookira; its android-release workflow attaches the
-      # APK to each vX.Y.Z release). Prereleases are skipped so betas never reach the repo.
-      # If the repo is private, set COOKIRA_RELEASE_TOKEN to a PAT with read access.
-      - name: Download Cookira APK
-        env:
-          GH_TOKEN: ${{ secrets.COOKIRA_RELEASE_TOKEN || github.token }}
-        run: |
-          mkdir -p repo
-          TAG=$(gh api 'repos/deranjer/cookira/releases?per_page=100' \
-            -q 'first(.[] | select(.draft | not) | select(.prerelease | not) | select(any(.assets[]; .name | endswith(".apk")))) | .tag_name')
-          if [ -z "$TAG" ] || [ "$TAG" = "null" ]; then
-            echo "::error::No Cookira release with an .apk asset found" && exit 1
-          fi
-          echo "Latest Cookira release with an APK: $TAG"
-          gh release download "$TAG" --repo deranjer/cookira \
-            --pattern '*.apk' --dir repo/ --clobber
 
       # Restore signing material; passwords are appended so they never sit in git
       - name: Restore keystore & secrets
