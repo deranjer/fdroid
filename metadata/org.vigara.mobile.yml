@@ -1,0 +1,19 @@
+Categories:
+  - Productivity
+License: MIT
+AuthorName: deranjer
+Name: Vigara
+Summary: Android client for the self-hosted Vigara server
+Description: |
+  Native Android client for Vigara, a self-hosted monitoring, backup and Docker
+  management server. Check device health and trends, manage containers (logs,
+  live stats, lifecycle actions), review and deploy Compose stacks, prune images,
+  networks and volumes, follow image updates and alerts, and administer users —
+  all against your own server.
+
+WebSite: https://github.com/deranjer/vigara
+SourceCode: https://github.com/deranjer/vigara
+IssueTracker: https://github.com/deranjer/vigara/issues
+
+# Prebuilt APKs are pulled from GitHub Releases; fdroid does not build from source.
+UpdateCheckMode: None
